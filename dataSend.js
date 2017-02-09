@@ -1,15 +1,17 @@
 var redis = require('redis');
+var http = require('http');
 
-var redisClient = redis.createClient(6380, '127.0.0.1');
+var client = redis.createClient(6379, '127.0.0.1');
 
 var data = [];
 var send =[];
 var keyArray = [];
+var cursor = "0";
 
 
 
 function scan () {
-    console.log('sds');
+    // console.log('sds');
     client.scan(
         cursor,
         'MATCH', '*',
@@ -37,8 +39,10 @@ function scan () {
     );
 }
 
+scan();
+
 function sendData() {
-    console.log('scan -end');
+    // console.log('scan -end');
     var count =0;
     if(data.length ==0){
         console.log('no-data');
@@ -47,18 +51,19 @@ function sendData() {
     for(var i=0;i<data.length;i++)
     {
         keyArray.push(data[i]);
-        console.log(i);
+        // console.log(i);
         var temp = data[i];
         var tempValue = null;
-        redisClient.get(temp, function(err, reply) {
+        client.get(temp, function(err, reply) {
 
             tempValue = reply;
             send.push(JSON.parse(tempValue));
             count+=1;
             if (count == data.length){
-                console.log('sdsd');
+                // console.log('sdsd');
+                // console.log(send);
                 PostCode(send);
-                console.log(send.length);
+                // console.log(send.length);
             }
         });
     }
@@ -66,14 +71,14 @@ function sendData() {
 
 
 function PostCode(dataEnter) {
-    console.log(dataEnter);
+    // console.log(dataEnter);
 
     var post_req  = null, post_data = JSON.stringify(dataEnter);
     console.log(post_data);
     var post_options = {
         hostname: '128.199.173.183',
         port    : '80',
-        path    : '/routeradar/web/app_dev.php/gps/upload',
+        path    : '/routeradar/web/app_dev.php/client-app-all/upload-bulk',
         method  : 'POST',
         headers : {
             'Content-Type': 'application/json',
@@ -88,10 +93,13 @@ function PostCode(dataEnter) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
             console.log('Response: ', chunk);
-            var reply = JSON.parse(chunk);
-            if(reply.status == true)
+            // var reply = JSON.parse(chunk);
+            // if(chunk == "true"){
+            //     console.log('sdsd');
+            // }
+            if(chunk == 'true')
             {
-                redisClient.del(keyArray,function (test) {
+                client.del(keyArray,function (test) {
                     console.log('delete ok');
                     process.exit();
                 });
