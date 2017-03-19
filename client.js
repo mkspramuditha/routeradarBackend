@@ -12,11 +12,14 @@ client.on('connect', function () {
 
 client.on('message', function (topic, message) {
     // message is Buffer
-    // console.log(message.toString());
+    var object = JSON.parse(message);
     var now = new Date();
+
+    var key = object.imie+object.time;
+    console.log(key);
     //
     now.toString();
-    redisClient.set(now,message.toString());
+    redisClient.set(key,message.toString());
     console.log(message.toString());
     // client.end();
 });

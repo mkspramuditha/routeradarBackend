@@ -75,8 +75,9 @@ function PostCode(dataEnter) {
 
     var post_req  = null, post_data = JSON.stringify(dataEnter);
     console.log(post_data);
+    console.log("############");
     var post_options = {
-        hostname: '128.199.173.183',
+            hostname: '128.199.173.183',
         port    : '80',
         path    : '/routeradar/web/app_dev.php/client-app-all/upload-bulk',
         method  : 'POST',
